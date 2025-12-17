@@ -20,16 +20,21 @@ public class PlayerController : MonoBehaviour
     public int health { get { return currentHealth; }}
     public int currentHealth;
 
-//Variables related to temporary invincibility
+                                                    // Invincibility
 public float timeInvincible = 2.0f;
 bool isInvincible;
 float damageCooldown;
+                                                    // Animation
+Animator animator;
+Vector2 moveDirection = new Vector2(1, 0);
+
 
     // Start is called before the first frame update
     void Start()
     {
         MoveAction.Enable();
         rigidbody2d = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         currentHealth = maxHealth;
 
     }
@@ -42,6 +47,18 @@ float damageCooldown;
         Debug.Log(move);
         Vector2 position = (Vector2)transform.position + move * speed * Time.deltaTime;
         transform.position = position;
+
+
+        if (!Mathf.Approximately(move.x, 0.0f) || !Mathf.Approximately(move.y, 0.0f))
+        {
+            moveDirection.Set(move.x, move.y);
+            moveDirection.Normalize();
+        }
+
+        animator.SetFloat("Look X", moveDirection.x);
+        animator.SetFloat("Look Y", moveDirection.y);
+        animator.SetFloat("Speed", move.magnitude);
+
 
         if (isInvincible)
         {
@@ -69,6 +86,7 @@ float damageCooldown;
             }
             isInvincible = true;
             damageCooldown = timeInvincible;
+            animator.SetTrigger("Hit");
         }
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
